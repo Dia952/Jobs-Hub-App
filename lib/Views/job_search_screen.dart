@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../Controllers/job_controller.dart';
-import '../Models/job_model.dart';
 import '../shared/components/components.dart';
 import 'job_application_form_screen.dart';
 
@@ -21,7 +20,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
   @override
   void initState() {
     super.initState();
-    jobController.fetchJobs();
+    jobController.fetchHomeScreenJobs();
     searchController.addListener(updatePrefixVisibility);
   }
 
@@ -71,7 +70,6 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                           child: Icon(Icons.search),
                         ),
                         onPressed: () async {
-                          jobController.isLoadingNotifier.value = true;
                           setState(() {
                             if (searchController.text.isEmpty && isSubmitted) {
                               isSubmitted = false;
@@ -80,8 +78,6 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                             }
                           });
                           await jobController.searchJobs(searchController.text);
-
-                          jobController.isLoadingNotifier.value = false;
                         },
                       )
                     : null,
@@ -112,7 +108,9 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      JobApplicationFormScreen(), // Navigate to the ApplicationFormScreen
+                                      JobApplicationFormScreen(
+                                    jobId: job.id,
+                                  ), // Navigate to the ApplicationFormScreen
                                 ),
                               );
                             },

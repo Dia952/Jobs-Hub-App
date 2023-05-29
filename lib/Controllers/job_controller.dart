@@ -1,12 +1,15 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Models/job_model.dart';
+import '../Services/job_service.dart';
 
 class JobController {
-  final List<Job> jobs = [];
+  final JobService _jobService = JobService();
+
+  List<Job> allJobs = [];
+  List<Job> fetchedJobs = [];
+  List<Job> displayedJobs = [];
   List<Job> filteredJobs = [];
 
   final int cardsPerPage = 5;
@@ -16,7 +19,23 @@ class JobController {
 
   final isLoadingNotifier = ValueNotifier<bool>(false);
 
-  Future<void> fetchJobs() async {
+  Future<void> fetchAllJobs() async {
+    if (isLoading) return;
+
+    isLoading = true;
+    isLoadingNotifier.value = true;
+    allJobs = await _jobService.getJobs();
+    isLoading = false;
+    isLoadingNotifier.value = false;
+  }
+
+  Future<void> fetchHomeScreenJobs() async {
+    await fetchAllJobs();
+
+    await fetchNextJobs();
+  }
+
+  Future<void> fetchNextJobs() async {
     if (isLoading) return;
 
     isLoading = true;
@@ -24,55 +43,34 @@ class JobController {
 
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    // final fetchedJobs = [
-    //   Job(
-    //     title: 'Full Stack Eng.',
-    //     description: 'We are looking for a great Full-Stack Dev.',
-    //     requirements: '.NET, Angular',
-    //     email: 'fs@dev.com',
-    //     address: 'Job 1 address',
-    //   ),
-    //   Job(
-    //     title: 'Mobile Developer',
-    //     description: 'We are looking for an experienced Mobile Eng.',
-    //     requirements: 'Flutter, Android, iOS',
-    //     email: 'mb@hr.com',
-    //     address: 'Job 2 address',
-    //   ),
-    //   Job(
-    //     title: 'Backend Engineer',
-    //     description: 'We are looking for a Python Geek!',
-    //     requirements: 'Python, Django, NodeJS',
-    //     email: 'geek@yolo.com',
-    //     address: 'Job 3 address',
-    //   ),
-    // ];
+    int startIndex = (currentPage - 1) * cardsPerPage;
+    int endIndex = startIndex + cardsPerPage;
 
-    List<Job> fetchedJobs = List.generate(
-      cardsPerPage,
-      (index) {
-        int jobNumber = (currentPage - 1) * cardsPerPage + index + 1;
-        return Job(
-            title: 'Job $jobNumber',
-            description: 'Job $jobNumber description',
-            requirements: 'Job $jobNumber requirements',
-            email: 'job$jobNumber@example.com',
-            address: 'Job $jobNumber address',
-            deadline: '10-5-2023');
-      },
-    );
+    if (startIndex >= allJobs.length) {
+      // No more jobs to fetch
+      isLoading = false;
+      isLoadingNotifier.value = false;
+      return;
+    }
 
-    jobs.addAll(fetchedJobs);
+    // Adjust endIndex to avoid exceeding the list length
+    if (endIndex > allJobs.length) {
+      endIndex = allJobs.length;
+    }
+
+    fetchedJobs = allJobs.reversed.toList().sublist(startIndex, endIndex);
+
+    displayedJobs.addAll(fetchedJobs);
     currentPage++;
     isLoading = false;
     isLoadingNotifier.value = false;
   }
 
   Future<void> refreshJobs() async {
-    jobs.clear();
+    displayedJobs.clear();
     currentPage = 1;
 
-    fetchJobs();
+    fetchHomeScreenJobs();
   }
 
   Future<void> searchJobs(String query) async {
@@ -82,14 +80,15 @@ class JobController {
       return;
     }
 
-    if (query.isNotEmpty) {
-      await fetchJobs();
-    }
+    await fetchAllJobs();
+    isLoading = true;
+    isLoadingNotifier.value = true;
+    await Future.delayed(const Duration(milliseconds: 1000));
 
     // Remove consecutive spaces from the query
     final searchTerms = query.toLowerCase().split(' ');
 
-    filteredJobs = jobs
+    filteredJobs = allJobs
         .where(
           (job) => searchTerms.every(
             (term) =>
@@ -98,10 +97,12 @@ class JobController {
                 job.requirements.toLowerCase().contains(term),
           ),
         )
+        .toList()
+        .reversed
         .toList();
-    // if (query.isNotEmpty) {
-    //   await Future.delayed(const Duration(milliseconds: 1000));
-    // }
+
+    isLoading = false;
+    isLoadingNotifier.value = false;
   }
 
   void sendEmail(String email, String jobTitle) async {
@@ -109,8 +110,8 @@ class JobController {
       scheme: 'mailto',
       path: email,
       queryParameters: {
-        'subject': 'jobTitle',
-        'body': 'I am applying for the position of $jobTitle.'
+        'subject': jobTitle,
+        'body': "I am applying for the position of $jobTitle."
       },
     );
 
@@ -118,6 +119,34 @@ class JobController {
       await launchUrl(emailUri);
     } else {
       throw 'Could not launch email app';
+    }
+  }
+
+  Future<int> jobApply(
+    String fullName,
+    String email,
+    String city,
+    String phone,
+    String gpa,
+    int jobId,
+    String cvFileName,
+    // cvFileBytes,
+  ) async {
+    try {
+      int res = await _jobService.jobApply(
+        fullName,
+        email,
+        city,
+        phone,
+        gpa,
+        jobId,
+        cvFileName,
+        // cvFileBytes,
+      );
+      return res;
+    } catch (error) {
+      debugPrint('Job Apply Error: $error');
+      return 0;
     }
   }
 }

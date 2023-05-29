@@ -23,6 +23,8 @@ class AuthController {
     try {
       User? user = await _authService.register(
           firstName, lastName, username, email, phone, password);
+      UserSingleton().user = user!;
+
       return user;
     } catch (error) {
       debugPrint('Registration Error: $error');

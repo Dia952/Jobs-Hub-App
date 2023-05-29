@@ -1,19 +1,20 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
-import 'package:jobs_hub/shared/components/components.dart';
-
-import '../../../Controllers/experience_controller.dart';
 import 'package:path/path.dart';
 
+import 'package:jobs_hub/Models/user_singleton.dart';
+import 'package:jobs_hub/shared/components/components.dart';
+
+import '../../../Controllers/user_controller.dart';
+import '../../../Models/user_model.dart';
+import '../../main_screen.dart';
+
 class EditExperienceScreen extends StatefulWidget {
-  final String experience;
   final List<String> skills;
 
   const EditExperienceScreen({
     super.key,
-    required this.experience,
     required this.skills,
   });
 
@@ -22,7 +23,10 @@ class EditExperienceScreen extends StatefulWidget {
 }
 
 class _EditExperienceScreenState extends State<EditExperienceScreen> {
-  ExperienceController expController = ExperienceController();
+  UserController userController = UserController();
+  User user = UserSingleton().user;
+
+  bool isLoading = false;
 
   late TextEditingController experienceTextEditingController;
   List<TextEditingController> skillsTextEditingControllers = [];
@@ -31,7 +35,7 @@ class _EditExperienceScreenState extends State<EditExperienceScreen> {
   void initState() {
     super.initState();
     experienceTextEditingController =
-        TextEditingController(text: widget.experience);
+        TextEditingController(text: user.experience);
     for (String skill in widget.skills) {
       skillsTextEditingControllers.add(TextEditingController(text: skill));
     }
@@ -88,9 +92,9 @@ class _EditExperienceScreenState extends State<EditExperienceScreen> {
                   width: 80,
                   child: ElevatedButton(
                     onPressed: () async {
-                      File? uploadedFile = await expController.uploadCV();
+                      File? uploadedFile = await userController.uploadCV();
                       setState(() {
-                        expController.uploadedCV = uploadedFile;
+                        userController.uploadedCV = uploadedFile;
                       });
                     },
                     child: const Text('Upload'),
@@ -99,11 +103,11 @@ class _EditExperienceScreenState extends State<EditExperienceScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            if (expController.uploadedCV != null)
+            if (userController.uploadedCV != null)
               GestureDetector(
-                onTap: expController.openCV,
+                onTap: userController.openCV,
                 child: Text(
-                  basename(expController.uploadedCV!.path),
+                  basename(userController.uploadedCV!.path),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                     color: Colors.blue,
@@ -161,10 +165,42 @@ class _EditExperienceScreenState extends State<EditExperienceScreen> {
               },
             ),
             const SizedBox(height: 32.0),
-            defaultButton(
-              function: () {},
-              text: 'Save',
-            ),
+            !isLoading
+                ? defaultButton(
+                    function: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      user.experience = experienceTextEditingController.text;
+                      Future.delayed(const Duration(seconds: 1));
+                      final isUpdated = await userController.updateUser();
+
+                      if (isUpdated) {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainScreen(index: 2),
+                            ));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('Experience updated successfully!'),
+                          duration: Duration(milliseconds: 1300),
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('An error occurred..'),
+                          duration: Duration(milliseconds: 1300),
+                        ));
+                      }
+                    },
+                    text: 'Save',
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                    ),
+                  ),
             const SizedBox(height: 20.0),
           ],
         ),

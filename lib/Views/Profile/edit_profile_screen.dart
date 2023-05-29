@@ -15,7 +15,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   UserController userController = UserController();
-  User userData = UserSingleton().user;
+  User user = UserSingleton().user;
 
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
@@ -31,6 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   bool changePassword = false;
   bool passwordVisible = false;
+  bool isLoading = false;
   final passwordFocusNode = FocusNode();
 
   String? statusSelectedValue = '';
@@ -58,18 +59,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
 
-    firstNameController = TextEditingController(text: userData.firstName);
-    lastNameController = TextEditingController(text: userData.lastName);
-    usernameController = TextEditingController(text: userData.username);
-    phoneController = TextEditingController(text: userData.phone);
-    emailController = TextEditingController(text: userData.email);
-    cityController = TextEditingController(text: userData.city);
-    educationController = TextEditingController(text: userData.education);
-    gpaController = TextEditingController(text: userData.gpa);
-    bioController = TextEditingController(text: userData.bio);
+    firstNameController = TextEditingController(text: user.firstName);
+    lastNameController = TextEditingController(text: user.lastName);
+    usernameController = TextEditingController(text: user.username);
+    phoneController = TextEditingController(text: user.phone);
+    emailController = TextEditingController(text: user.email);
+    cityController = TextEditingController(text: user.city);
+    educationController = TextEditingController(text: user.education);
+    gpaController = TextEditingController(text: user.gpa);
+    bioController = TextEditingController(text: user.bio);
     passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    statusSelectedValue = userData.status ?? '';
+    statusSelectedValue = user.status ?? '';
   }
 
   @override
@@ -150,9 +151,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         .scaffoldBackgroundColor,
                                     child: CircleAvatar(
                                       radius: 60.0,
-                                      backgroundImage: NetworkImage(userData
-                                              .profileImage ??
-                                          'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png'),
+                                      backgroundImage: AssetImage(
+                                          user.profileImage ??
+                                              'assets/images/user_image.png'),
                                     ),
                                   ),
                                   IconButton(
@@ -437,50 +438,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ],
                     const SizedBox(height: 32.0),
-                    defaultButton(
-                      text: 'Save Changes',
-                      function: () {
-                        if (formKey.currentState!.validate()) {
-                          // Perform update profile logic here
-                          // Update user data and save it
+                    !isLoading
+                        ? defaultButton(
+                            text: 'Save Changes',
+                            function: () async {
+                              if (formKey.currentState!.validate()) {
+                                setState(() {
+                                  isLoading = true;
+                                });
 
-                          userData.firstName = firstNameController.text;
-                          userData.lastName = lastNameController.text;
-                          userData.username = usernameController.text;
-                          userData.phone = phoneController.text;
-                          userData.email = emailController.text;
-                          userData.city = cityController.text;
-                          userData.education = educationController.text;
-                          userData.gpa = gpaController.text;
-                          userData.bio = bioController.text;
-                          userData.status = statusSelectedValue;
+                                user.firstName = firstNameController.text;
+                                user.lastName = lastNameController.text;
+                                user.username = usernameController.text;
+                                user.phone = phoneController.text;
+                                user.email = emailController.text;
+                                user.city = cityController.text;
+                                user.education = educationController.text;
+                                user.gpa = gpaController.text;
+                                user.bio = bioController.text;
+                                user.status = statusSelectedValue;
 
-                          if (changePassword) {
-                            userData.password = passwordController.text;
-                          }
+                                if (changePassword) {
+                                  user.password = passwordController.text;
+                                }
 
-                          // // Save the updated user data
-                          userController.updateUser(userData);
-                          // // Show success message or navigate back
-                          setState(() {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Profile updated successfully'),
-                                duration: Duration(milliseconds: 1300),
-                                closeIconColor: Colors.white,
-                                showCloseIcon: true,
-                              ),
-                            );
-                          });
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainScreen(index: 2),
+                                await Future.delayed(
+                                    const Duration(seconds: 1));
+
+                                final isUpdated =
+                                    await userController.updateUser();
+
+                                if (isUpdated) {
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainScreen(index: 2),
+                                      ));
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content:
+                                        Text('Profile updated successfully!'),
+                                    duration: Duration(milliseconds: 1300),
+                                  ));
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(const SnackBar(
+                                    content: Text('An error occurred..'),
+                                    duration: Duration(milliseconds: 1300),
+                                  ));
+                                }
+                              }
+                            },
+                          )
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
                             ),
-                          );
-                        }
-                      },
-                    ),
+                          ),
                     const SizedBox(
                       height: 20,
                     )

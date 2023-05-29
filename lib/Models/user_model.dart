@@ -6,11 +6,11 @@ class User {
   String? profileCoverImage;
   String? firstName = '';
   String? lastName = '';
-  String? phone = '';
+  dynamic phone = '';
   String? email = '';
   String? city = '';
   String? education = '';
-  String? gpa = '';
+  dynamic gpa = '';
   String? bio = '';
   String? status = '';
   String? experience = '';
@@ -34,4 +34,25 @@ class User {
     this.experience,
     this.skills,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'role': "user",
+      'id': int.parse(id!),
+      'userName': username,
+      'password': password,
+      // 'profileImage': profileImage,
+      // 'profileCoverImage': profileCoverImage,
+      'firstName': firstName,
+      'lastName': lastName,
+      'phoneNumber': int.parse(phone),
+      'email': email,
+      'city': city,
+      'education': education,
+      'gpa': gpa == '' ? null : int.parse(gpa.split('.')[0]),
+      'bio': bio,
+      'state': status,
+      'experience': experience,
+    };
+  }
 }

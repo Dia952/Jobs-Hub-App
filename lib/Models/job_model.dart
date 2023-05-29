@@ -1,12 +1,14 @@
 class Job {
+  final int id;
   final String title;
   final String description;
   final String requirements;
   final String email;
   final String address;
-  final String deadline;
+  final DateTime deadline;
 
   Job({
+    required this.id,
     required this.title,
     required this.description,
     required this.requirements,

@@ -1,9 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:jobs_hub/Controllers/job_controller.dart';
 import 'package:path/path.dart' as p;
 
+import '../Models/user_model.dart';
+import '../Models/user_singleton.dart';
+
 class JobApplicationFormScreen extends StatefulWidget {
-  const JobApplicationFormScreen({super.key});
+  final int jobId;
+
+  const JobApplicationFormScreen({
+    super.key,
+    required this.jobId,
+  });
 
   @override
   State<JobApplicationFormScreen> createState() =>
@@ -11,14 +22,36 @@ class JobApplicationFormScreen extends StatefulWidget {
 }
 
 class _JobApplicationFormScreenState extends State<JobApplicationFormScreen> {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController cityController = TextEditingController();
-  final TextEditingController phoneNumberController = TextEditingController();
-  final TextEditingController gpaController = TextEditingController();
+  User user = UserSingleton().user;
+  JobController jobController = JobController();
+
+  late GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late TextEditingController fullNameController = TextEditingController();
+  late TextEditingController emailController = TextEditingController();
+  late TextEditingController cityController = TextEditingController();
+  late TextEditingController phoneNumberController = TextEditingController();
+  late TextEditingController gpaController = TextEditingController();
+
+  late int jobId;
 
   String? _cvFilePath;
+  String? _cvFileName;
+  Uint8List? _cvFileBytes;
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fullNameController =
+        TextEditingController(text: "${user.firstName} ${user.lastName}");
+    emailController = TextEditingController(text: user.email);
+    cityController = TextEditingController(text: user.city);
+    phoneNumberController = TextEditingController(text: user.phone);
+    gpaController = TextEditingController(text: user.gpa);
+    jobId = widget.jobId;
+  }
 
   @override
   void dispose() {
@@ -32,50 +65,70 @@ class _JobApplicationFormScreenState extends State<JobApplicationFormScreen> {
 
   Future<void> _pickCVFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
+    _cvFilePath = result?.files.single.path;
+    _cvFileBytes = result?.files.single.bytes;
 
     if (result != null) {
       setState(() {
-        _cvFilePath = result.files.single.path;
+        _cvFileName = result.files.single.name;
       });
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (formKey.currentState!.validate()) {
-      // Perform form submission logic here
-      // Access form field values using the controller values
-
-      if (_cvFilePath == null || _cvFilePath == 'Please upload a CV file.') {
+      if (_cvFileName == null || _cvFileName == 'Please upload a CV file.') {
         setState(() {
-          _cvFilePath = 'Please upload a CV file.';
+          _cvFileName = 'Please upload a CV file.';
         });
         return;
       }
+      isLoading = true;
       final fullName = fullNameController.text;
       final email = emailController.text;
       final city = cityController.text;
       final phoneNumber = phoneNumberController.text;
       final gpa = gpaController.text;
+      final cvFileName = _cvFileName!;
 
-      // Access the CV file path
-      final cvFilePath = _cvFilePath;
-
-      // Perform logic with the form data
-
-      // Reset the form
-      formKey.currentState!.reset();
-
-      // Clear the CV file path
-      setState(() {
-        _cvFilePath = null;
-      });
-
-      // Show a success message or navigate back to the previous screen
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Form submitted successfully!')),
+      int res = await jobController.jobApply(
+        fullName,
+        email,
+        city,
+        phoneNumber,
+        gpa,
+        jobId,
+        cvFileName,
+        // _cvFileBytes,
       );
+
+      if (res == 200 || res == 201) {
+        // Reset the form
+        formKey.currentState!.reset();
+
+        // Clear the CV file path
+        setState(() {
+          _cvFilePath = null;
+          _cvFileName = null;
+        });
+        await Future.delayed(const Duration(seconds: 1));
+        Navigator.pop(context);
+        // Show a success message or navigate back to the previous screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Form submitted successfully!'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An error occurred...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
     }
-    Navigator.pop(context);
   }
 
   @override
@@ -155,18 +208,21 @@ class _JobApplicationFormScreenState extends State<JobApplicationFormScreen> {
                     label: const Text('Upload CV'),
                   ),
                   const SizedBox(height: 12.0),
-                  if (_cvFilePath != null)
+                  if (_cvFileName != null)
                     Text(
-                      p.basename(_cvFilePath!),
+                      _cvFileName!,
                       style: const TextStyle(color: Colors.blue),
                     ),
                 ],
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Submit'),
-              ),
+              !isLoading
+                  ? ElevatedButton(
+                      onPressed: _submitForm,
+                      child: const Text('Submit'),
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(strokeWidth: 1.5))
             ],
           ),
         ),

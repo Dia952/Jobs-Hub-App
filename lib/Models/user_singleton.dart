@@ -10,4 +10,8 @@ class UserSingleton {
   UserSingleton._internal();
 
   User user = User();
+
+  void resetUser() {
+    user = User();
+  }
 }

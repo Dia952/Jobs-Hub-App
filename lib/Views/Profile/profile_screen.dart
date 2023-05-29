@@ -37,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     User user = UserSingleton().user;
+    print(user.password);
     return Scaffold(
       body: Column(
         children: [
@@ -78,9 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 Theme.of(context).scaffoldBackgroundColor,
                             child: CircleAvatar(
                               radius: 60.0,
-                              backgroundImage: NetworkImage(user.profileImage ??
-                                  'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png'),
-                              // 'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png'),
+                              backgroundImage: AssetImage(
+                                user.profileImage ??
+                                    'assets/images/user_image.png',
+                              ),
                             ),
                           ),
                           Padding(
@@ -100,25 +102,27 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    color: Colors.blue,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(4),
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1.0),
-                                    child: Text(
-                                      'Status : ${user.status ?? ''}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                user.status != ''
+                                    ? Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.blue,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(4),
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(1.0),
+                                          child: Text(
+                                            'Status : ${user.status ?? ''}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox(height: 15),
                               ],
                             ),
                           ),
@@ -203,7 +207,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ],
                   ),
                 ),
-                // Tags tab content
                 SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
@@ -219,7 +222,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditExperienceScreen(
-                                  experience: user.experience ?? '',
                                   skills: user.skills ?? [],
                                 ),
                               ),

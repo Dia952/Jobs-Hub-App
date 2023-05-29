@@ -8,7 +8,8 @@ import 'home_screen.dart';
 import 'job_search_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, int? index}) : super(key: key);
+  final int index;
+  const MainScreen({Key? key, required this.index}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -17,9 +18,13 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   User user = UserSingleton().user;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  int _currentIndex;
+  late int _currentIndex;
 
-  _MainScreenState({int? initialIndex}) : _currentIndex = initialIndex ?? 0;
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.index;
+  }
 
   final List<Widget> _pages = const [
     HomeScreen(),
@@ -56,7 +61,7 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(width: 10),
         ],
       ),
-      drawer: const NavigationDrawer(),
+      drawer: NavigationDrawer(index: _currentIndex),
       body: _pages[_currentIndex],
       bottomNavigationBar: buildBottomNavigationBar(),
     );
@@ -100,7 +105,8 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({Key? key}) : super(key: key);
+  final int index;
+  const NavigationDrawer({Key? key, required this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Drawer(
@@ -113,8 +119,8 @@ class NavigationDrawer extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    buildHeader(context),
-                    buildMenuItems(context),
+                    buildHeader(context, index),
+                    buildMenuItems(context, index),
                     const Divider(),
                   ],
                 ),
@@ -131,11 +137,35 @@ class NavigationDrawer extends StatelessWidget {
                     leading: const Icon(Icons.logout_outlined),
                     title: const Text('Logout'),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Logout'),
+                            content:
+                                const Text('Are you sure you want to log out?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  UserSingleton().resetUser();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Yes'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('No'),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                   ),
@@ -146,13 +176,24 @@ class NavigationDrawer extends StatelessWidget {
         ),
       );
 
-  Widget buildHeader(BuildContext context) {
+  Widget buildHeader(BuildContext context, index) {
     final User user = UserSingleton().user;
 
     return Material(
       color: Theme.of(context).primaryColor,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          if (index == 2) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pop(context);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const MainScreen(index: 2),
+              ),
+            );
+          }
+        },
         child: Container(
           padding: EdgeInsets.only(
             top: 24 + MediaQuery.of(context).padding.top,
@@ -165,8 +206,9 @@ class NavigationDrawer extends StatelessWidget {
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
                   radius: 60.0,
-                  backgroundImage: NetworkImage(user.profileImage ??
-                      'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png'),
+                  backgroundImage: AssetImage(
+                    user.profileImage ?? 'assets/images/user_image.png',
+                  ),
                 ),
               ),
               const SizedBox(
@@ -195,7 +237,7 @@ class NavigationDrawer extends StatelessWidget {
     );
   }
 
-  Widget buildMenuItems(BuildContext context) => Padding(
+  Widget buildMenuItems(BuildContext context, index) => Padding(
         padding: const EdgeInsets.all(24),
         child: Wrap(
           spacing: 16,
@@ -203,17 +245,50 @@ class NavigationDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home_outlined),
               title: const Text('Home'),
-              onTap: () {},
+              onTap: () {
+                if (index == 0) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pop(context);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(index: 0),
+                    ),
+                  );
+                }
+              },
             ),
             ListTile(
               leading: const Icon(Icons.person_outline),
               title: const Text('Profile'),
-              onTap: () {},
+              onTap: () {
+                if (index == 2) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pop(context);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(index: 2),
+                    ),
+                  );
+                }
+              },
             ),
             ListTile(
               leading: const Icon(Icons.search_outlined),
               title: const Text('Search'),
-              onTap: () {},
+              onTap: () {
+                if (index == 1) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pop(context);
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(index: 1),
+                    ),
+                  );
+                }
+              },
             ),
           ],
         ),

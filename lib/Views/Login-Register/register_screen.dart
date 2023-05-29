@@ -216,19 +216,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     defaultFormField(
                       controller: confirmPasswordController,
                       focusNode: confirmPasswordFocusNode,
-                      onSubmit: (value) {
+                      onSubmit: (value) async {
                         if (formKey.currentState!.validate()) {
                           if (passwordController.text ==
                               confirmPasswordController.text) {
+                            authController.register(
+                              firstNameController.text,
+                              lastNameController.text,
+                              usernameController.text,
+                              emailController.text,
+                              phoneController.text,
+                              passwordController.text,
+                            );
+
                             setState(() {
                               passwordMatch = true;
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const MainScreen(),
-                                ),
-                              );
+                              isRegister = true;
                             });
+                            await Future.delayed(const Duration(seconds: 2));
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const MainScreen(index: 0),
+                              ),
+                            );
                           } else if (passwordMatch) {
                             setState(() {
                               passwordMatch = false;
@@ -294,7 +306,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MainScreen(),
+                              builder: (context) => const MainScreen(index: 0),
                             ),
                           );
                         } else if (passwordMatch) {
@@ -306,7 +318,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     text: 'Register',
                   ),
-                if (isRegister) const CircularProgressIndicator(),
+                if (isRegister)
+                  const CircularProgressIndicator(strokeWidth: 1.5),
                 const SizedBox(
                   height: 5,
                 ),

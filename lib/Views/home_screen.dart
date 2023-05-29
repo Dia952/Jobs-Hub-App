@@ -22,14 +22,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    jobController.fetchJobs();
+    jobController.fetchHomeScreenJobs();
     scrollController.addListener(scrollListener);
   }
 
   void scrollListener() {
     if (scrollController.offset >= scrollController.position.maxScrollExtent &&
         !scrollController.position.outOfRange) {
-      jobController.fetchJobs();
+      jobController.fetchNextJobs();
     }
   }
 
@@ -51,28 +51,16 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ValueListenableBuilder<bool>(
           valueListenable: jobController.isLoadingNotifier,
           builder: (context, isLoading, _) {
-            if (!isLoading || jobController.jobs.isNotEmpty) {
+            if (!isLoading || jobController.displayedJobs.isNotEmpty) {
               return CustomScrollView(
                 controller: scrollController,
                 slivers: [
                   SliverToBoxAdapter(
                     child: CarouselSlider(
-                      items: const [
-                        Image(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(
-                              'https://s3.us-east-2.amazonaws.com/medcerts.com-staging/blog/articles/7-fun-jobs-that-pay-well-without-a-degree/_800x418_crop_center-center_82_none/Different-Careers-Illustration-Smaller-01.png?mtime=1588720399'),
-                        ),
-                        Image(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(
-                              'https://redlakejobs.ca/wp-content/uploads/2020/10/employment.jpg'),
-                        ),
-                        Image(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(
-                              'https://www.urban.org/sites/default/files/2022-03/jobs-feature-header-1700x700_0.png'),
-                        ),
+                      items: [
+                        Image.asset('assets/images/1.png', fit: BoxFit.cover),
+                        Image.asset('assets/images/2.png', fit: BoxFit.cover),
+                        Image.asset('assets/images/3.png', fit: BoxFit.cover),
                       ],
                       options: CarouselOptions(
                         height: 180.0,
@@ -87,8 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     delegate: SliverChildListDelegate(
                       [
                         const SizedBox(height: 10),
-                        if (jobController.jobs.isNotEmpty)
-                          _buildJobList(jobController.jobs),
+                        if (jobController.displayedJobs.isNotEmpty)
+                          _buildJobList(jobController.displayedJobs),
                         if (jobController.isLoading)
                           Column(
                             children: const [
@@ -100,6 +88,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 10),
                             ],
                           ),
+                        if (jobController.displayedJobs.isEmpty &&
+                            !jobController.isLoading)
+                          const Center(
+                            child: Text(
+                              'An error occurred... Couldn\'t load jobs.',
+                            ),
+                          )
                       ],
                     ),
                   ),
@@ -129,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      JobApplicationFormScreen(), // Navigate to the ApplicationFormScreen
+                      JobApplicationFormScreen(jobId: jobs[index].id),
                 ),
               );
             },

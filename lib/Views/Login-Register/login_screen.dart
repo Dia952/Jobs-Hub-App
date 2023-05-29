@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:jobs_hub/Controllers/auth_controller.dart';
 import 'package:jobs_hub/Views/main_screen.dart';
@@ -77,14 +79,65 @@ class _LoginScreenState extends State<LoginScreen> {
                 defaultFormField(
                   controller: passwordController,
                   focusNode: passwordFocusNode,
-                  onSubmit: (value) {
+                  onSubmit: (value) async {
                     if (formKey.currentState!.validate()) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
+                      setState(() {
+                        isLogin = true;
+                      });
+
+                      // Perform the login
+                      final loginResult = await authController.login(
+                        usernameController.text,
+                        passwordController.text,
                       );
+
+                      setState(() {
+                        isLogin = false;
+                      });
+                      if (loginResult != null) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainScreen(index: 0),
+                          ),
+                        );
+                      } else if (loginResult == null) {
+                        // Invalid credentials, show error message
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Invalid Credentials'),
+                            content: const Text(
+                                'Please check your username and password.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        // Other login error occurred, handle accordingly
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Login Error'),
+                            content: const Text(
+                                'An error occurred while logging in.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     }
                   },
                   keyboardType: TextInputType.visiblePassword,
@@ -128,25 +181,68 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (!isLogin)
                   defaultButton(
                     function: () async {
-                      // formKey.currentState!.validate();
                       if (formKey.currentState!.validate()) {
-                        authController.login(
-                            usernameController.text, passwordController.text);
                         setState(() {
                           isLogin = true;
                         });
-                        await Future.delayed(const Duration(seconds: 2));
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainScreen(),
-                          ),
+
+                        // Perform the login
+                        final loginResult = await authController.login(
+                          usernameController.text,
+                          passwordController.text,
                         );
+                        setState(() {
+                          isLogin = false;
+                        });
+                        if (loginResult != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MainScreen(index: 0),
+                            ),
+                          );
+                        } else if (loginResult == null) {
+                          // Invalid credentials, show error message
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Invalid Credentials'),
+                              content: const Text(
+                                  'Please check your username and password.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          // Other login error occurred, handle accordingly
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Login Error'),
+                              content: const Text(
+                                  'An error occurred while logging in.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                       }
                     },
                     text: 'Login',
                   ),
-                if (isLogin) const CircularProgressIndicator(),
+                if (isLogin) const CircularProgressIndicator(strokeWidth: 1.5),
                 const SizedBox(
                   height: 10,
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobs_hub/shared/styles/colors.dart';
-
+import 'package:intl/intl.dart';
 import '../../Models/job_model.dart';
 
 Widget defaultButton({
@@ -61,7 +61,7 @@ Widget defaultFormField({
         labelText: label,
         labelStyle: const TextStyle(
           color: Colors.grey,
-          fontSize: 11.0,
+          fontSize: 10.0,
         ),
         prefixIcon: Icon(
           prefix,
@@ -93,12 +93,37 @@ Widget jobCard({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              job.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    job.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Wrap(
+                  spacing: 6.0,
+                  runSpacing: 6.0,
+                  children: [
+                    const Icon(
+                      Icons.access_time_filled,
+                      color: Colors.grey,
+                      size: 16,
+                    ),
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(job.deadline),
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(
               height: 16,
@@ -164,6 +189,24 @@ Widget jobCard({
                 ),
                 Text(
                   job.address,
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6.0,
+              runSpacing: 6.0,
+              children: [
+                const Icon(
+                  Icons.access_time_filled,
+                  color: Colors.grey,
+                  size: 16,
+                ),
+                Text(
+                  DateFormat('yyyy-MM-dd').format(job.deadline),
                   style: const TextStyle(
                     fontSize: 14,
                   ),
