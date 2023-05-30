@@ -37,7 +37,6 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     User user = UserSingleton().user;
-    print(user.password);
     return Scaffold(
       body: Column(
         children: [
@@ -53,14 +52,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(4.0),
-                        topRight: Radius.circular(4.0),
-                      ),
-                      image: DecorationImage(
-                        image: NetworkImage(user.profileCoverImage ?? ''),
-                        fit: BoxFit.cover,
-                      ),
+                      image: user.coverImage != null
+                          ? DecorationImage(
+                              image: FileImage(user.coverImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
                   ),
                 ),
@@ -79,10 +76,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 Theme.of(context).scaffoldBackgroundColor,
                             child: CircleAvatar(
                               radius: 60.0,
-                              backgroundImage: AssetImage(
-                                user.profileImage ??
-                                    'assets/images/user_image.png',
-                              ),
+                              backgroundImage: user.profileImage != null
+                                  ? FileImage(user.profileImage!)
+                                      as ImageProvider
+                                  : const AssetImage(
+                                      'assets/images/user_image.png'),
                             ),
                           ),
                           Padding(

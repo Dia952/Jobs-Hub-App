@@ -203,12 +203,12 @@ class NavigationDrawer extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 62.0,
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 child: CircleAvatar(
                   radius: 60.0,
-                  backgroundImage: AssetImage(
-                    user.profileImage ?? 'assets/images/user_image.png',
-                  ),
+                  backgroundImage: user.profileImage != null
+                      ? FileImage(user.profileImage!) as ImageProvider
+                      : const AssetImage('assets/images/user_image.png'),
                 ),
               ),
               const SizedBox(

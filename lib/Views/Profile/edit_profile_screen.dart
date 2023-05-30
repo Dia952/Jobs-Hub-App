@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:jobs_hub/Controllers/user_controller.dart';
 import 'package:jobs_hub/Models/user_singleton.dart';
@@ -5,6 +8,11 @@ import 'package:jobs_hub/Models/user_singleton.dart';
 import '../../Models/user_model.dart';
 import '../../shared/components/components.dart';
 import '../main_screen.dart';
+
+enum ImageType {
+  Profile,
+  Cover,
+}
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({Key? key}) : super(key: key);
@@ -88,6 +96,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  File? _selectedCoverImage;
+  File? _selectedProfileImage;
+
+  void _selectImage(ImageType imageType) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      File selectedImage = File(result.files.single.path!);
+      setState(() {
+        if (imageType == ImageType.Profile) {
+          _selectedProfileImage = selectedImage;
+          // user.profileImage = selectedImage;
+        } else if (imageType == ImageType.Cover) {
+          _selectedCoverImage = selectedImage;
+          // user.profileImage = selectedImage;
+          // user.profileCoverImage = selectedImage;
+        }
+      });
+    } else {
+      print('No image selected.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,6 +129,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'Edit Profile',
         ),
         titleSpacing: 5.0,
+        actions: [
+          if (_selectedProfileImage != null || _selectedCoverImage != null)
+            ElevatedButton(
+              onPressed: () {
+                if (_selectedProfileImage != null) {
+                  user.profileImage = _selectedProfileImage;
+                }
+                if (_selectedCoverImage != null) {
+                  user.coverImage = _selectedCoverImage;
+                }
+
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(index: 2),
+                    ));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Image updated successfully!'),
+                  duration: Duration(milliseconds: 1300),
+                ));
+              },
+              child: const Text(
+                'SAVE',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -117,10 +181,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             width: double.infinity,
                             decoration: BoxDecoration(
                               color: Theme.of(context).primaryColor,
+                              image: (_selectedCoverImage != null)
+                                  ? DecorationImage(
+                                      image: FileImage(_selectedCoverImage!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : (user.coverImage != null)
+                                      ? DecorationImage(
+                                          image: FileImage(user.coverImage!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                             ),
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () => _selectImage(ImageType.Cover),
                             icon: const CircleAvatar(
                               backgroundColor: Colors.white,
                               radius: 20.0,
@@ -151,13 +226,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         .scaffoldBackgroundColor,
                                     child: CircleAvatar(
                                       radius: 60.0,
-                                      backgroundImage: AssetImage(
-                                          user.profileImage ??
-                                              'assets/images/user_image.png'),
+                                      backgroundImage: (_selectedProfileImage !=
+                                              null)
+                                          ? FileImage(_selectedProfileImage!)
+                                          : (user.profileImage != null)
+                                              ? FileImage(user.profileImage!)
+                                                  as ImageProvider
+                                              : const AssetImage(
+                                                  'assets/images/user_image.png'),
                                     ),
                                   ),
                                   IconButton(
-                                    onPressed: () {},
+                                    onPressed: () =>
+                                        _selectImage(ImageType.Profile),
                                     icon: const CircleAvatar(
                                       backgroundColor: Colors.white,
                                       radius: 20.0,
@@ -169,8 +250,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   ),
                                 ],
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 7),
+                              const SizedBox(
+                                width: 7,
+                              ),
+                              Flexible(
+                                // padding: const EdgeInsets.only(left: 7),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,

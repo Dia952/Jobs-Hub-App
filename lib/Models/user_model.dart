@@ -1,9 +1,11 @@
+import 'dart:io';
+
 class User {
   String? id = '';
   String? username = '';
   String? password = '';
-  String? profileImage;
-  String? profileCoverImage;
+  File? profileImage;
+  File? coverImage;
   String? firstName = '';
   String? lastName = '';
   dynamic phone = '';
@@ -19,7 +21,7 @@ class User {
   User({
     this.id,
     this.profileImage,
-    this.profileCoverImage,
+    this.coverImage,
     this.username,
     this.password,
     this.firstName,
