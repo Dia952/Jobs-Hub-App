@@ -118,19 +118,20 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: jobs.length,
       itemBuilder: (BuildContext context, int index) {
         return jobCard(
-            job: jobs[index],
-            onApplyPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      JobApplicationFormScreen(jobId: jobs[index].id),
-                ),
-              );
-            },
-            onEmailPressed: () {
-              jobController.sendEmail(jobs[index].email, jobs[index].title);
-            });
+          job: jobs[index],
+          onApplyPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    JobApplicationFormScreen(jobId: jobs[index].id),
+              ),
+            );
+          },
+          onEmailPressed: () {
+            jobController.sendEmail(jobs[index].email, jobs[index].title);
+          },
+        );
       },
       separatorBuilder: (BuildContext context, int index) {
         return const SizedBox(height: 8);

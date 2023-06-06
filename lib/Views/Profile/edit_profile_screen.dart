@@ -57,8 +57,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     '',
     'IT',
     'Business',
-    'Economy',
-    'Sports',
+    'Accounting',
+    'Healthcare',
+    'Education',
   ];
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -79,6 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
     statusSelectedValue = user.status ?? '';
+    interestSelectedValue = user.interest ?? '';
   }
 
   @override
@@ -541,6 +543,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 user.gpa = gpaController.text;
                                 user.bio = bioController.text;
                                 user.status = statusSelectedValue;
+                                user.interest = interestSelectedValue;
 
                                 if (changePassword) {
                                   user.password = passwordController.text;

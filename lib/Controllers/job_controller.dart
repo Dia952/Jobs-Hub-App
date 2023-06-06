@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Models/job_model.dart';
+import '../Models/user_model.dart';
+import '../Models/user_singleton.dart';
 import '../Services/job_service.dart';
 
 class JobController {
   final JobService _jobService = JobService();
+  final User user = UserSingleton().user;
 
   List<Job> allJobs = [];
   List<Job> fetchedJobs = [];
@@ -58,7 +61,19 @@ class JobController {
       endIndex = allJobs.length;
     }
 
+    int categoryComparator(Job a, Job b) {
+      // Compare the similarity of job categories to the user's interest
+      int similarityA =
+          a.category?.toLowerCase() == user.interest?.toLowerCase() ? 1 : 0;
+      int similarityB =
+          b.category?.toLowerCase() == user.interest?.toLowerCase() ? 1 : 0;
+
+      // Sort in descending order of similarity
+      return similarityB.compareTo(similarityA);
+    }
+
     fetchedJobs = allJobs.reversed.toList().sublist(startIndex, endIndex);
+    fetchedJobs.sort(categoryComparator);
 
     displayedJobs.addAll(fetchedJobs);
     currentPage++;

@@ -23,9 +23,13 @@ class AuthController {
     try {
       User? user = await _authService.register(
           firstName, lastName, username, email, phone, password);
-      UserSingleton().user = user!;
-
-      return user;
+      if (user != null) {
+        UserSingleton().user = user;
+        return user;
+      } else {
+        debugPrint('Registration Error: User is null');
+        return null;
+      }
     } catch (error) {
       debugPrint('Registration Error: $error');
       return null;

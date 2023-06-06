@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:jobs_hub/Models/project_model.dart';
+
 class User {
   String? id = '';
   String? username = '';
@@ -16,7 +18,9 @@ class User {
   String? bio = '';
   String? status = '';
   String? experience = '';
+  String? interest = '';
   List<String>? skills = [];
+  // List<Project>? projects = [];
 
   User({
     this.id,
@@ -34,6 +38,7 @@ class User {
     this.bio,
     this.status,
     this.experience,
+    this.interest,
     this.skills,
   });
 
@@ -54,6 +59,7 @@ class User {
       'gpa': gpa == '' ? null : int.parse(gpa.split('.')[0]),
       'bio': bio,
       'state': status,
+      'interest': interest,
       'experience': experience,
     };
   }

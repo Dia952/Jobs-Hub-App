@@ -134,6 +134,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                           padding: EdgeInsets.all(16.0),
                           child: Text(
                             'No results found. Please try a different search term.',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
                               color: Colors.grey,
@@ -148,6 +149,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                 return Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: const [
                       Icon(
                         Icons.search_outlined,
@@ -159,6 +161,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
                       ),
                       Text(
                         'Search by Job Title, Requirements or Company Email',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.grey,
                         ),

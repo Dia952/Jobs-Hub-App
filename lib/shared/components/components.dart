@@ -95,6 +95,35 @@ Widget jobCard({
           children: [
             Row(
               children: [
+                const Icon(
+                  Icons.business,
+                  // size: 16,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    job.preTitle,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      // fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  DateFormat('yyyy-MM-dd').format(job.publishDate),
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
                 Expanded(
                   child: Text(
                     job.title,
@@ -106,23 +135,7 @@ Widget jobCard({
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Wrap(
-                  spacing: 6.0,
-                  runSpacing: 6.0,
-                  children: [
-                    const Icon(
-                      Icons.access_time_filled,
-                      color: Colors.grey,
-                      size: 16,
-                    ),
-                    Text(
-                      DateFormat('yyyy-MM-dd').format(job.deadline),
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(width: 10),
               ],
             ),
             const SizedBox(
@@ -227,8 +240,8 @@ Widget jobCard({
                   label: const Text(
                     'Apply',
                     style: TextStyle(
-                      fontSize: 12,
-                    ), // Adjust the text size as needed
+                      fontSize: 11,
+                    ),
                   ),
                 ),
                 ElevatedButton.icon(
@@ -237,26 +250,26 @@ Widget jobCard({
                   },
                   icon: const Icon(
                     Icons.business,
-                    size: 16, // Adjust the icon size as needed
+                    size: 16,
                   ),
                   label: const Text(
-                    'Company Profile',
+                    'Company',
                     style: TextStyle(
-                      fontSize: 12,
-                    ), // Adjust the text size as needed
+                      fontSize: 11,
+                    ),
                   ),
                 ),
                 ElevatedButton.icon(
                   onPressed: onEmailPressed,
                   icon: const Icon(
                     Icons.email,
-                    size: 14, // Adjust the icon size as needed
+                    size: 16,
                   ),
                   label: const Text(
                     'Email',
                     style: TextStyle(
-                      fontSize: 12,
-                    ), // Adjust the text size as needed
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],

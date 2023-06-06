@@ -144,13 +144,28 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
               tabs: const [
                 Tab(
-                  text: 'Personal Info',
+                  icon: Icon(Icons.person_pin_outlined),
+                  child: Text(
+                    'User Info',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 10),
+                  ),
                 ),
                 Tab(
-                  text: 'Experience',
+                  icon: Icon(Icons.info_outline),
+                  child: Text(
+                    'Experience',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 10),
+                  ),
                 ),
                 Tab(
-                  text: 'Projects',
+                  icon: Icon(Icons.work_outline),
+                  child: Text(
+                    'Projects',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 10),
+                  ),
                 ),
               ],
             ),
@@ -161,6 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               children: [
                 SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
                       const SizedBox(height: 16.0),
@@ -202,10 +218,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                         maxLines: 5,
                       ),
                       const SizedBox(height: 16.0),
+                      _buildInfoRow(
+                        'Interest',
+                        user.interest ?? '',
+                      ),
+                      const SizedBox(height: 16.0),
                     ],
                   ),
                 ),
                 SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                 ),
                 SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     children: [
@@ -263,11 +286,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            print(_tabController.index);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => AddProjectScreen(),
+                                builder: (context) => const AddProjectScreen(),
                               ),
                             );
                           },
@@ -324,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          flex: 3,
+          flex: 4,
           child: Text(
             label,
             style: const TextStyle(
@@ -337,14 +359,14 @@ class _ProfileScreenState extends State<ProfileScreen>
           width: 16.0,
         ),
         Expanded(
-          flex: 7,
+          flex: 8,
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 16.0,
+              fontSize: 14.0,
             ),
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
+            // maxLines: maxLines,
+            // overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -378,7 +400,11 @@ class _ProfileScreenState extends State<ProfileScreen>
   List<DataColumn> getColumns(List<String> columns) => columns
       .map(
         (String column) => DataColumn(
-          label: Text(column),
+          tooltip: column,
+          label: Text(
+            column,
+            // style: const TextStyle(fontSize: 10),
+          ),
         ),
       )
       .toList();
@@ -409,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         (data) => DataCell(
           ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: 250,
+              maxWidth: 190,
               // minWidth: 10,
             ),
             child: Text(
@@ -417,6 +443,9 @@ class _ProfileScreenState extends State<ProfileScreen>
               overflow: TextOverflow.ellipsis,
               softWrap: true,
               maxLines: 3,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
             ),
           ),
         ),

@@ -10,8 +10,14 @@ class UserController {
   File? uploadedCV;
 
   Future<bool> updateUser() async {
-    final updateStatus = await userService.updateUser();
-    return updateStatus;
+    try {
+      final updateStatus = await userService.updateUser();
+      return updateStatus;
+    } catch (error) {
+      // Handle the error
+      print('An error occurred while updating the user: $error');
+      return false; // or throw an exception if needed
+    }
   }
 
   Future<File?> uploadCV() async {

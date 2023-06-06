@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jobs_hub/Controllers/auth_controller.dart';
 import 'package:jobs_hub/Views/main_screen.dart';
 
+import '../../Models/user_model.dart';
 import '../../shared/components/components.dart';
 import '../Profile/profile_screen.dart';
 
@@ -267,13 +268,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(
                         height: 8,
                       ),
-                      Row(
+                      Wrap(
                         children: const [
                           Text(
                             'Passwords don\'t match, Please check your password',
                             style: TextStyle(
                               color: Colors.red,
-                              fontSize: 12,
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -289,7 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (formKey.currentState!.validate()) {
                         if (passwordController.text ==
                             confirmPasswordController.text) {
-                          authController.register(
+                          var user = authController.register(
                             firstNameController.text,
                             lastNameController.text,
                             usernameController.text,
@@ -303,12 +304,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             isRegister = true;
                           });
                           await Future.delayed(const Duration(seconds: 2));
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainScreen(index: 0),
-                            ),
-                          );
+                          if (await user != null) {
+                            await Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const MainScreen(index: 0),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text(
+                                  'An error ocurred.. registration failed'),
+                              duration: Duration(milliseconds: 1300),
+                            ));
+                            setState(() {
+                              isRegister = false;
+                            });
+                          }
                         } else if (passwordMatch) {
                           setState(() {
                             passwordMatch = false;
